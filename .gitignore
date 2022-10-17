@@ -1,0 +1,5 @@
+ClientServer.csproj
+PGenerated/
+POutput/
+Test.cs
+obj/
