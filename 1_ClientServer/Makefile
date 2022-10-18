@@ -22,3 +22,6 @@ check:
 	# check tcSingleClientAbstractServer
 	$(pmc) POutput/netcoreapp3.1/ClientServer.dll \
 		-m PImplementation.tcSingleClientAbstractServer.Execute -i $(num_schedules)
+
+clean:
+	git clean -x -d -i
