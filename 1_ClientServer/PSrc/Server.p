@@ -19,11 +19,11 @@ machine BankServer
   start state Init {
     entry (initialBalance: map[int, int]){
       database = new Database((server = this, initialBalance = initialBalance));
-      goto WaitForRequests;
+      goto WaitForWithdrawRequests;
     }
   }
 
-  state WaitForRequests {
+  state WaitForWithdrawRequests {
     on eWithDrawReq do (wReq: tWithDrawReq) {
       var currentBalance: int;
       var response: tWithDrawResp;
@@ -43,15 +43,6 @@ machine BankServer
 
       // send response to the client
       send wReq.source, eWithDrawResp, response;
-    }
-    on eDepositReq do (req: tDepositReq) {
-      var currentBalance: int;
-      var resp: tDepositResp;
-      // read the current account balance from the database
-      currentBalance = ReadBankBalance(database, req.accountId);
-      UpdateBankBalance(database, req.accountId, currentBalance + req.amount);
-      resp = (accountId=req.accountId, balance=currentBalance+req.amount, rId=req.rId);
-      send req.source, eDepositResp, resp;
     }
   }
 }

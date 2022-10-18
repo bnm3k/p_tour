@@ -10,10 +10,6 @@ type tWithDrawReq = (source: Client, accountId: int, amount: int, rId:int);
 // `rId`: request id for which this is the response.
 type tWithDrawResp = (status: tWithDrawRespStatus, accountId: int, balance: int, rId: int);
 
-
-type tDepositReq = (source: Client, accountId: int, amount:int, rId:int);
-type tDepositResp = (accountId:int, balance:int, rId: int);
-
 // enum representing the response status for the withdraw request
 enum tWithDrawRespStatus {
   WITHDRAW_SUCCESS,
@@ -24,10 +20,6 @@ enum tWithDrawRespStatus {
 event eWithDrawReq : tWithDrawReq;
 // event: withdraw response (from bank server to client)
 event eWithDrawResp: tWithDrawResp;
-// event: deposit request (from client to bank server)
-event eDepositReq: tDepositReq;
-// event: deposit response (from bank server to client)
-event eDepositResp: tDepositResp;
 
 
 machine Client
@@ -53,6 +45,8 @@ machine Client
 
   state WithdrawMoney {
     entry {
+      var index : int;
+
       // If current balance is <= 10 then we need more deposits before any more withdrawal
       if(currentBalance <= 10)
         goto NoMoneyToWithDraw;
@@ -76,7 +70,6 @@ machine Client
         assert currentBalance == resp.balance,
           format ("Withdraw failed BUT the account balance changed! client thinks: {0}, bank balance: {1}", currentBalance, resp.balance);
         print format ("Withdrawal with rId = {0} failed, account balance = {1}", resp.rId, resp.balance);
-        goto DepositMoney;
       }
 
       if(currentBalance > 10)
@@ -87,25 +80,9 @@ machine Client
     }
   }
 
-  state DepositMoney {
-    entry {
-      // send deposit request to the bank for a random amount between (1 to current balance + 1)
-      send server, eDepositReq, (source = this, accountId=accountId, amount = DepositAmount(), rId = nextReqId);
-      nextReqId = nextReqId + 1;
-    }
-
-    on eDepositResp do (resp: tDepositResp) {
-      goto WithdrawMoney;
-    }
-  }
-
   // function that returns a random integer between (1 to current balance + 1)
   fun WithdrawAmount() : int {
     return choose(currentBalance) + 1;
-  }
-
-  fun DepositAmount(): int {
-      return choose(currentBalance) + 1;
   }
 
   state NoMoneyToWithDraw {
