@@ -1,27 +1,26 @@
 .SILENT:
 .DEFAULT_GOAL:=check
-.PHONY: help compile check clean
+.PHONY: compile check clean
 
-pmc:=coyote test
-num_schedules:=100
+PROJ:=TwoPhaseCommit
+TEST_CASES:= tcSingleClientNoFailure tcMultipleClientsNoFailure tcMultipleClientsWithFailure
 
+SRCS:=$(wildcard PSrc/*.p PTst/*.p PSpec/*.p PForeign/*.cs)
+DLL:=POutput/netcoreapp3.1/$(PROJ).dll
 
-help:
-	echo '2 phase commit example'
+PMC:=coyote test
+NUM_SCHEDULES:=10000
 
-compile:
+$(DLL): $(SRCS)
 	pc -proj:TwoPhaseCommit.pproj
 
-check:
-	# check tcSingleClient
-	$(pmc) POutput/netcoreapp3.1/ClientServer.dll \
-		-m PImplementation.tcSingleClient.Execute -i $(num_schedules)
-	# check tcMultipleClients
-	$(pmc) POutput/netcoreapp3.1/ClientServer.dll \
-		-m PImplementation.tcMultipleClients.Execute -i $(num_schedules)
-	# check tcSingleClientAbstractServer
-	$(pmc) POutput/netcoreapp3.1/ClientServer.dll \
-		-m PImplementation.tcSingleClientAbstractServer.Execute -i $(num_schedules)
+compile: $(DLL)
+
+check: $(TEST_CASES)
+
+$(TEST_CASES): $(DLL)
+	$(PMC) POutput/netcoreapp3.1/$(PROJ).dll -m PImplementation.$@.Execute \
+		-i $(NUM_SCHEDULES)
 
 clean:
 	git clean -x -d -i
