@@ -42,7 +42,7 @@ machine Client {
         // await response from the participant
         receive {
           case eReadTransResp: (readResp: tReadTransResp) {
-              assert readResp.key == currTransaction.key && readResp.val == currTransaction.val,
+              assert readResp.key == currTransaction.key && (readResp.val == currTransaction.val || readResp.transId > currTransaction.transId),
               format ("Record read is not same as what was written by the client, read:{0}, written:{1}",
                 readResp.val, currTransaction.val
               );

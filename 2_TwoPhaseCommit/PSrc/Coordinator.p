@@ -2,7 +2,7 @@ type tTrans = (key: string, val: int, transId: int);
 type tWriteTransReq = (client: Client, trans: tTrans);
 type tWriteTransResp = (transId: int, status: tTransStatus);
 type tReadTransReq = (client: Client, key: string);
-type tReadTransResp = (key: string, val: int, status: tTransStatus);
+type tReadTransResp = (key: string, val: int, transId: int, status: tTransStatus);
 
 enum tTransStatus {
   SUCCESS,
@@ -33,18 +33,18 @@ event eInformCoordinator: Coordinator;
 
 
 /*
-
-The Coordinator:
-- receives write and read transactions from the client.
-- services those txs one by one in the order in which they are received.
-- On receiving a write tx, the coordinator sends prepare request to all the
-  participants and waits for prepare responses from all the participants
-- Based on the responsens, the coordinator either commits the tx or aborts
-- If the coordinator fails to receive agreement from participants in time, then
-  it times out and aborts the tx.
-- On receiving a read transaction, the coordinator randomly selects a
-  participant and forwards the read request to that participant.
-
+*
+* The Coordinator:
+* - receives write and read transactions from the client.
+* - services those txs one by one in the order in which they are received.
+* - On receiving a write tx, the coordinator sends prepare request to all the
+*   participants and waits for prepare responses from all the participants
+* - Based on the responsens, the coordinator either commits the tx or aborts
+* - If the coordinator fails to receive agreement from participants in time,
+*   then *   it times out and aborts the tx.
+* - On receiving a read transaction, the coordinator randomly selects a
+*   participant and forwards the read request to that participant.
+*
 */
 
 machine Coordinator {

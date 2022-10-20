@@ -31,8 +31,11 @@ machine Participant {
     on ePrepareReq do (req: tPrepareReq) {
       pendingWriteTrans[req.transId] = req;
       // non-deterministically pick whether to accept or reject the transaction
-      // accept if key not in store or if key in store but its transId is less
-      // than the request's transId
+      // the transaction is accepted if one of the two is true:
+      //  (1) first time writing key
+      //  (2) if key was already present, and the update's transId is greater
+      //      than the current transId. This implies that a key's transId is
+      //      is strictly monotonic.
       if (! (req.key in kvStore) || (req.key in kvStore && req.transId > kvStore[req.key].transId)){
         send coordinator, ePrepareResp, (participant = this, transId = req.transId, status = SUCCESS);
       }else {
@@ -42,9 +45,9 @@ machine Participant {
 
     on eReadTransReq do (req: tReadTransReq) {
       if (req.key in kvStore){
-        send req.client, eReadTransResp, (key=req.key, val = kvStore[req.key].val, status = SUCCESS );
+        send req.client, eReadTransResp, (key=req.key, val=kvStore[req.key].val, transId=kvStore[req.key].transId, status=SUCCESS);
       } else {
-        send req.client, eReadTransResp, (key="", val=-1, status=ERROR);
+        send req.client, eReadTransResp, (key="", val=-1, transId=-1, status=ERROR);
       }
     }
 
