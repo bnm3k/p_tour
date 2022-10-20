@@ -26,8 +26,11 @@ machine Client {
 
   state SendWriteTransaction {
     entry {
-      currTransaction = ChooseRandomTransaction(id * 100 + N);
-      send coordinator, eWriteTransReq, (client = this, trans = currTransaction);
+      if (N > 0) {
+        N = N - 1;
+        currTransaction = ChooseRandomTransaction(id * 100 + N);
+        send coordinator, eWriteTransReq, (client = this, trans = currTransaction);
+      }
     }
 
     on eWriteTransResp goto ConfirmTransaction;
@@ -39,20 +42,21 @@ machine Client {
       // it's the value initially written
       if (writeResp.status == SUCCESS) {
         send coordinator, eReadTransReq, (client=this, key=currTransaction.key);
-        // await response from the participant
-        receive {
-          case eReadTransResp: (readResp: tReadTransResp) {
-              assert readResp.key == currTransaction.key && (readResp.val == currTransaction.val || readResp.transId > currTransaction.transId),
-              format ("Record read is not same as what was written by the client, read:{0}, written:{1}",
-                readResp.val, currTransaction.val
-              );
-          }
-        }
+        return;
       }
-      if (N > 0) { // has more work to do
-        N = N - 1;
-        goto SendWriteTransaction;
-      }
+      goto SendWriteTransaction;
+    }
+
+    on eReadTransResp do (resp: tReadTransResp) {
+      assert resp.key == currTransaction.key && (resp.val == currTransaction.val || resp.transId > currTransaction.transId),
+        format ("Record read is not same as what was written by the client, read:{0}, written:{1}",
+          resp.val, currTransaction.val
+        );
+      goto SendWriteTransaction;
+    }
+
+    on eTimeOut do {
+      send coordinator, eReadTransReq, (client=this, key=currTransaction.key);
     }
   }
 }

@@ -82,7 +82,7 @@ machine Coordinator {
 
     // when in this state, it is fine to drop these messages as they are from
     // previous transactions
-    ignore  ePrepareResp, eTimeOut;
+    ignore ePrepareResp, eTimeOut;
   }
 
   var countPrepareResponses: int;
