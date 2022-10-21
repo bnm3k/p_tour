@@ -36,7 +36,7 @@ machine SaneUser {
           case eCoffeeMakerError: (status: tCoffeeMakerState) {
             // lets fill beans or water and reset the machine and go back
             // to making espresso
-            PerformOperationOnCoffeeMaker(cPanel, CM_PressEspressoButton);
+            PerformOperationOnCoffeeMaker(cPanel, CM_PressResetButton);
           }
         }
       }
