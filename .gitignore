@@ -1,4 +1,4 @@
-ClientServer.csproj
+*.csproj
 PGenerated/
 POutput/
 Test.cs
