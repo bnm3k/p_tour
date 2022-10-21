@@ -3,7 +3,7 @@
 .PHONY: compile check clean
 
 PROJ:=EspressoMachine
-TEST_CASES:=
+TEST_CASES:= tcSaneUserUsingCoffeeMachine tcCrazyUserUsingCoffeeMachine
 
 SRCS:=$(wildcard PSrc/*.p PTst/*.p PSpec/*.p )
 DLL:=POutput/netcoreapp3.1/$(PROJ).dll
