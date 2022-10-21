@@ -12,7 +12,7 @@ event eCoffeeMachineUser: machine; // coffee machine user
 
 // represents the state of the coffee maker
 enum tCoffeeMakerState {
-  NotWWarmedUp,
+  NotWarmedUp,
   Ready,
   NoBeansError,
   NoWaterError
@@ -31,7 +31,7 @@ machine CoffeeMakerControlPanel {
 
   start state Init {
     entry {
-      coffeeMakerState = NotWWarmedUp;
+      coffeeMakerState = NotWarmedUp;
       coffeeMaker = new EspressoCoffeeMaker(this);
       WaitForUser();
       goto WarmUpCoffeeMaker;
@@ -82,9 +82,12 @@ machine CoffeeMakerControlPanel {
   }
 
   state CoffeeMakerDoorOpened {
+    entry {
+      announce eGroundsDoorOpened;
+    }
     on eCloseGroundsDoor do {
-      if (coffeeMakerState == NotWWarmedUp) goto WarmUpCoffeeMaker;
-      else goto CoffeeMakerReady;
+      assert coffeeMakerState != NotWarmedUp;
+      goto CoffeeMakerReady;
     }
   }
 

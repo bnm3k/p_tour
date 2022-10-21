@@ -5,6 +5,7 @@ event eInBeansGrindingState;
 event eInCoffeeBrewingState;
 event eErrorHappened;
 event eResetPerformed;
+event eGroundsDoorOpened;
 
 
 /*
@@ -23,7 +24,7 @@ through the following sequence of states:
 */
 spec EspressoMachineModesOfOperation
 observes eInWarmUpState, eInReadyState, eInBeansGrindingState,
-  eInCoffeeBrewingState, eErrorHappened, eResetPerformed
+  eInCoffeeBrewingState, eErrorHappened, eResetPerformed, eGroundsDoorOpened
 {
   start state StartUp {
     on eInWarmUpState goto WarmUp;
@@ -38,6 +39,9 @@ observes eInWarmUpState, eInReadyState, eInBeansGrindingState,
     ignore eInReadyState;
     on eInBeansGrindingState goto BeanGrinding;
     on eErrorHappened goto Error;
+    on eGroundsDoorOpened do {
+      goto GroundsDoorOpen;
+    }
   }
 
   state BeanGrinding {
@@ -49,6 +53,13 @@ observes eInWarmUpState, eInReadyState, eInBeansGrindingState,
     on eInReadyState goto Ready;
     on eErrorHappened goto Error;
   }
+
+  state GroundsDoorOpen {
+    // no need to have a grounds door closed since it's implied whenever
+    // we move back to ready
+    on eInReadyState goto Ready;
+  }
+
 
   state Error {
     on eResetPerformed goto StartUp;
