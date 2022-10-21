@@ -1,0 +1,8 @@
+<Project>
+<ProjectName>HelloWorld</ProjectName>
+<InputFiles>
+	<PFile>./HelloWorld.p</PFile>
+</InputFiles>
+<Target>CSharp</Target>
+<OutputDir>./PGenerated/</OutputDir>
+</Project>
