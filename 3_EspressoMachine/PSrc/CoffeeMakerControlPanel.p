@@ -78,7 +78,7 @@ machine CoffeeMakerControlPanel {
     // of an error from user or sensor
     ignore eSteamerButtonOff, eCloseGroundsDoor;
     // ignore commands and errors as they are from previous state
-    ignore eWarmUpCompleted, eResetCoffeeMaker, eNoBeansError;
+    ignore eWarmUpCompleted, eResetCoffeeMaker, eNoBeansError, eNoWaterError;
   }
 
   state CoffeeMakerDoorOpened {
