@@ -4,7 +4,7 @@ event eGreetResp: string;
 machine Greeter {
   start state Greet {
     on eGreetReq do (req: (person: Person, name: string)) {
-      send req.person, eGreetResp, "Yebo";
+      send req.person, eGreetResp, format("Hello, {0}", req.name);
     }
   }
 }
@@ -12,13 +12,22 @@ machine Greeter {
 machine Person {
   var name: string;
   var greetingGenerator: Greeter;
+
   start state Init {
-    entry (config: (n: string, g: Greeter)) {
-      name = config.n;
-      greetingGenerator = config.g;
+    entry (config: (name:string, greeter:Greeter)) {
+      name = config.name;
+      greetingGenerator = config.greeter;
+      goto WaitForGreeting;
+    }
+  }
+
+  state WaitForGreeting {
+    entry {
       send greetingGenerator, eGreetReq, (person=this, name=name);
     }
-    ignore eGreetResp;
+    on eGreetResp do (greeting: string) {
+      print format("received greeting: {0}", greeting);
+    }
   }
 }
 
@@ -26,26 +35,29 @@ machine TestGreetingOccurs {
   start state Init {
     entry {
       var greeter: Greeter;
+      var name : string;
+
       greeter = new Greeter();
-      new Person((n="Alice", g=greeter));
+      name = "Alice";
+
+      new Person((name=name, greeter=greeter));
     }
   }
 }
 
 spec GreetingGetsResponse observes eGreetReq, eGreetResp {
   var name: string;
-  start state Init {
-    on eGreetReq goto WaitForResponse;
-  }
+  start state Check {
+    on eGreetReq do (req: (person: Person, name:string)){
+      name = req.name;
+    }
 
-  hot state WaitForResponse {
-    on eGreetResp goto Done;
+    on eGreetResp do (greeting: string) {
+      assert greeting == format("Hello, {0}", name);
+    }
   }
-
-  state Done { }
 }
 
 
-module mod = {Person, Greeter,TestGreetingOccurs};
-test TestHelloWorld [main=TestGreetingOccurs] :
-  assert GreetingGetsResponse in mod;
+test Test [main=TestGreetingOccurs] :
+  assert GreetingGetsResponse in {Person, Greeter, TestGreetingOccurs};
