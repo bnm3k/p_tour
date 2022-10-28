@@ -1,0 +1,8 @@
+<Project>
+<ProjectName>AlternatingBitProtocol</ProjectName>
+<InputFiles>
+	<PFile>./</PFile>
+</InputFiles>
+<Target>CSharp</Target>
+<OutputDir>./PGenerated/</OutputDir>
+</Project>
